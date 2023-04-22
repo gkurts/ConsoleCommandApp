@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ConsoleCommandApp.Exceptions;
+using ConsoleCommandApp.Interfaces;
 
 namespace ConsoleCommandApp.Services
 {
-    public interface IWeatherService
-    {
-        Task<int> GetTemperatureAsync(int zip);
-    }
-
     public class WeatherService : IWeatherService
     {
+        ///<inheritdoc />
         public async Task<int> GetTemperatureAsync(int zip)
         {
             Thread.Sleep(500);
@@ -28,20 +21,5 @@ namespace ConsoleCommandApp.Services
 
             return await Task.FromResult(temp);
         }
-    }
-
-    [Serializable]
-    public class GetTemperatureException : Exception
-    {
-        public GetTemperatureException()
-        { }
-
-        public GetTemperatureException(string message)
-            : base(message)
-        { }
-
-        public GetTemperatureException(string message, Exception innerException)
-            : base(message, innerException)
-        { }
     }
 }

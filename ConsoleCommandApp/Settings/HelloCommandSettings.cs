@@ -13,5 +13,9 @@ namespace ConsoleCommandApp.Settings
         [Description("What is your zip code?")]
         [CommandOption("-z|--zip")]
         public int? ZipCode { get; init; }
+
+        [Description("What is your name?")]
+        [CommandOption("-n|--name")]
+        public string? Name { get; set; }
     }
 }

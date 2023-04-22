@@ -1,4 +1,5 @@
-﻿using ConsoleCommandApp.Services;
+﻿using ConsoleCommandApp.Exceptions;
+using ConsoleCommandApp.Interfaces;
 using ConsoleCommandApp.Settings;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -17,10 +18,58 @@ namespace ConsoleCommandApp.Commands
 
         public HelloCommand(IWeatherService weatherService)
         {
-            _weatherService=weatherService;
+            _weatherService = weatherService;
         }
 
         public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] HelloCommandSettings settings)
+        {
+            var zipCode = PromptUserForZip(settings);
+            var name = PromptUserForName(settings);
+
+            try
+            {
+                var temp = await _weatherService.GetTemperatureAsync((int)zipCode);
+
+                var tempColor = "yellow";
+
+                if (temp < 32) tempColor = "blue";
+                if (temp > 92) tempColor = "red";
+
+                AnsiConsole.MarkupLine($"Hello {name}! The temperature for {zipCode} is a balmy [{tempColor}]{temp}[/] degrees Frankenstein.");
+            }
+            catch (GetTemperatureException tex)
+            {
+                AnsiConsole.WriteException(tex, ExceptionFormats.ShortenEverything);
+            }
+
+            return 0;
+        }
+
+        private string PromptUserForName(HelloCommandSettings settings)
+        {
+            string? name = settings.Name;
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = AnsiConsole.Prompt(new TextPrompt<string>("[green]What is your name?[/]")
+                    .PromptStyle("white")
+                    .DefaultValue("Tony")
+                    .Validate(val =>
+                    {
+                        if (string.IsNullOrEmpty(val))
+                            return ValidationResult.Error("You must enter your name!");
+
+                        if (val.Length <= 2)
+                            return ValidationResult.Error("That name is too short... No, really.");
+
+                        return ValidationResult.Success();
+                    }));
+            }
+
+            return name;
+        }
+
+        private int PromptUserForZip(HelloCommandSettings settings)
         {
             int? zipCode = settings.ZipCode;
 
@@ -41,24 +90,7 @@ namespace ConsoleCommandApp.Commands
                     }));
             }
 
-            int temp = 88;
-            try
-            {
-                temp = await _weatherService.GetTemperatureAsync((int)zipCode);
-
-                var tempColor = "yellow";
-
-                if (temp < 32) tempColor = "blue";
-                if (temp > 92) tempColor = "red";
-
-                AnsiConsole.MarkupLine($"Hello there! The temperature for {zipCode} is a balmy [{tempColor}]{temp}[/] degrees Frankenstein.");
-            }
-            catch (GetTemperatureException tex)
-            {
-                AnsiConsole.WriteException(tex, ExceptionFormats.ShortenEverything);
-            }
-
-            return 0;
+            return (int)zipCode;
         }
     }
 }

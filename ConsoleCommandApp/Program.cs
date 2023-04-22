@@ -1,4 +1,5 @@
 ﻿using ConsoleCommandApp.Commands;
+using ConsoleCommandApp.Interfaces;
 using ConsoleCommandApp.Internal;
 using ConsoleCommandApp.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,7 @@ namespace ConsoleCommandApp
                 config.AddCommand<HelloCommand>("SayHello")
                     .WithDescription("Say hello and get the temperature where you are!")
                     .WithAlias("hi")
-                    .WithExample(new[] { "SayHello", "-z|--zip (zip code)" });
+                    .WithExample(new[] { "SayHello", "-z|--zip (zip code)", "-n|--name (name)" });
             });
 
             app.Run(args);
